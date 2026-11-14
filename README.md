@@ -4,6 +4,10 @@ A fleet operations and intelligence demo that brings together a React dashboard,
 
 This project is designed to simulate a modern logistics command center where operators can review trip requests, monitor vehicles, manage drivers, inspect operational history, and use AI-assisted insights to spot risky conditions.
 
+## Deployed Website
+
+[Open the live HACKSYMMETRIC website](https://soldiers-handling-contacting-flour.trycloudflare.com/)
+
 ## Features
 
 - Fleet overview dashboard with operational KPIs and alerts
