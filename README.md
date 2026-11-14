@@ -1,17 +1,62 @@
-# OkGadi Fleet Operations
+# HACKSYMMETRIC
 
-## Local stack
+A fleet operations and intelligence demo that brings together a React dashboard, a Node.js API, PostgreSQL/MongoDB data layers, and a Python-based anomaly detection service.
 
-The development stack uses PostgreSQL for fleet, driver, and trip records; MongoDB for vehicle telemetry snapshots; Redis for cached intelligence results; and FastAPI for anomaly scoring and dispatch recommendations.
+This project is designed to simulate a modern logistics command center where operators can review trip requests, monitor vehicles, manage drivers, inspect operational history, and use AI-assisted insights to spot risky conditions.
 
-Prerequisites on Windows:
+## Features
+
+- Fleet overview dashboard with operational KPIs and alerts
+- Trip dispatch workflow for creating and evaluating trip requests
+- Vehicle monitoring panel with sample telemetry and health states
+- Driver management and readiness tracking
+- Fleet trip history and operational reporting
+- AI insights using a trained anomaly detection model
+- Local and production deployment setup with Docker Compose
+- Database fallback logic for local demo resilience
+
+## Tech Stack
+
+- Frontend: React, TypeScript, Vite, Tailwind CSS
+- API layer: Node.js, Express
+- Data stores: PostgreSQL, MongoDB, SQLite fallback support
+- AI service: Python, FastAPI, scikit-learn
+- Orchestration: Docker Compose
+
+## Project Structure
+
+```text
+.
+├── app/                     # React frontend and dashboard UI
+├── server/                  # Express API and backend logic
+├── services/
+│   └── intelligence/       # FastAPI anomaly detection package and ML model
+├── deploy/                  # Deployment-related files
+├── styles/                  # Styling assets
+├── Dockerfile.api           # API container definition
+├── Dockerfile.web           # Web container definition
+├── compose.yaml             # Local development stack
+├── compose.production.yaml  # Production stack configuration
+├── package.json             # App scripts and dependencies
+├── tsconfig.json            # TypeScript config
+├── vite.config.ts           # Vite config
+├── index.html               # App entry HTML
+├── main.tsx                 # Frontend bootstrap
+├── .env.production.example  # Production env template
+├── README.md                # Project documentation
+└── ...
+```
+
+## Getting Started
+
+### Prerequisites
 
 - Node.js and npm
-- Docker Desktop running with the Linux container engine
-- Python 3.14 available through the `py` launcher
-- The local Redis service running on port 6379
+- Docker Desktop with the Linux container engine enabled
+- Python 3.14 via the `py` launcher on Windows
+- Redis running locally on port 6379 for the intelligence service
 
-Start the databases and application:
+### Install and Run
 
 ```powershell
 npm install
@@ -20,26 +65,52 @@ npm run train:ml
 npm run dev:full
 ```
 
-The dashboard opens at `http://127.0.0.1:5173`. PostgreSQL is exposed on `127.0.0.1:5433` to avoid colliding with older local OkGadi stacks on port 5432. MongoDB uses `127.0.0.1:27017`; the backend and frontend use the configured local defaults.
+This starts the local data services, the AI service, and the Vite web application.
 
-`npm run infra:up` starts only the PostgreSQL and MongoDB containers. `npm run infra:down` stops this Compose project without removing its persistent volumes. The project is isolated as `okgadi-infra` and does not stop or reuse containers from the older OkGadi Compose project.
+- Web app: http://127.0.0.1:5173
+- PostgreSQL: 127.0.0.1:5433
+- MongoDB: 127.0.0.1:27017
+- Redis: 127.0.0.1:6379
 
-## Data behavior
+## Common Scripts
 
-- PostgreSQL is the primary store for fleet, driver, and trip records.
-- If a populated legacy `server/data/fleet.sqlite` exists, the API imports it once when initializing an empty PostgreSQL database.
-- If PostgreSQL is unavailable, the Node API reports the degraded state and uses the SQLite fallback; the browser also retains its local fallback.
-- Vehicle Monitoring can save the currently displayed sample readings to MongoDB and browse recent snapshots for that vehicle. No physical sensor stream is connected in this demo.
-- Docker credentials in `compose.yaml` are for local development only. Do not expose these services publicly or reuse these credentials in production.
+```powershell
+npm run dev          # Start the frontend only
+npm run api          # Start the Express API
+npm run ai           # Start the FastAPI intelligence service
+npm run train:ml     # Train the anomaly detection model
+npm run infra:up     # Start PostgreSQL and MongoDB containers
+npm run infra:down   # Stop the local infrastructure stack
+npm run deploy:up    # Start the production-style Docker stack
+npm run deploy:down  # Stop the production stack
+```
 
-## Public deployment
+## Data and Runtime Behavior
 
-Production deployment targets a Linux VPS with Docker Engine and Docker Compose. Only Caddy publishes ports 80 and 443; it obtains HTTPS certificates. The app is public with no sign-in, and all visitors share the same writable demo fleet data. The API applies per-IP rate limits, but these do not replace user authentication or authorization. Databases, Redis, Node, and FastAPI have no public host ports.
+- PostgreSQL stores the primary operational records for fleet entities and trips.
+- MongoDB is used for telemetry snapshots and vehicle monitoring data.
+- Redis supports cached intelligence results and related demo workflows.
+- SQLite may be used as a fallback if the primary database is unavailable.
+- The AI model is a synthetic, demo-oriented anomaly detector and should not be treated as production-ready fleet intelligence without further validation.
 
-1. Point a DNS `A` record for your domain at the VPS public IPv4 address. Allow inbound TCP ports 80 and 443 (and UDP 443 for HTTP/3) in the host/cloud firewall.
-2. Install Docker Engine and the Docker Compose plugin on the VPS, then copy this project to it.
-3. Copy `.env.production.example` to `.env.production` and set your domain and unique database/cache secrets. Use long random alphanumeric passwords.
-4. Start the stack with `npm run deploy:up` or `docker compose --env-file .env.production -f compose.production.yaml up --build -d --wait`.
-5. Visit `https://<your-domain>`.
+## Production Deployment
 
-The production Compose project has its own persistent volumes and does not stop or reuse the local development database containers. Back up the `postgres_data`, `mongo_data`, and `redis_data` volumes before host maintenance. Do not commit `.env.production` or publish its credentials. Because access is public, this configuration is suitable for a demo with synthetic records; add user authentication and authorization before using real fleet data.
+A production deployment targets a Linux VPS with Docker Engine and Docker Compose. The project includes a production Compose file and environment template for configuring domain, secrets, and service networking.
+
+1. Copy `.env.production.example` to `.env.production`.
+2. Set your domain and secure database/cache secrets.
+3. Start the stack with:
+
+```powershell
+npm run deploy:up
+```
+
+4. Open the configured HTTPS URL for the application.
+
+## Notes
+
+This repository is a demo and starter implementation for fleet operations monitoring and AI-powered operational intelligence. It is intended for local development, experimentation, and demonstration workflows rather than as a hardened production system without additional security, validation, and operational review.
+
+## License
+
+This project does not currently declare a license file in the repository. If you plan to distribute or reuse it publicly, add an appropriate open-source license before doing so.
