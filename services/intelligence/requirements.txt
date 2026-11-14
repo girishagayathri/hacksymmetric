@@ -1,0 +1,6 @@
+fastapi>=0.115
+redis>=5
+uvicorn>=0.34
+joblib>=1.4
+numpy>=2.0
+scikit-learn>=1.5
